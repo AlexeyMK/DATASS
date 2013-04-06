@@ -2,7 +2,8 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
-
+from selenium import selenium
+import time
 
 # Class: QkmeSpider
 # -----------------
@@ -18,7 +19,8 @@ class QkmeSpider (BaseSpider):
         #list to contain the absolute links to each instance page
         self.instance_page_urls = []
         self.baseURL = 'http://www.quickmeme.com'
-
+        self.selenium = selenium("localhost", 4444, "*chrome", "http://www.quickmeme.com")
+        self.selenium.start ()
         pass
     
     
@@ -88,25 +90,24 @@ class QkmeSpider (BaseSpider):
         requests = []
         add_caption_url = hxs.select(add_caption_xpath).extract()
         for url in add_caption_url:
-            requests.append (Request(self.baseURL + url, callback=self.parse_add_caption_page))
-        return requests
+        
+            sel = self.selenium
+            sel.open(self.baseURL + url)
+            time.sleep(2.5)
+            
+            top_text_xpath = '//textarea[@tabindex="1"]/text()'
+            bottom_text_xpath = '//textarea[@tabindex="2"]/text()'
+            
+            top_text = sel.get_text(top_text_xpath)
+            bottom_text = sel.get_text(bottom_text_xpath)
+        
 
 
-    def parse_add_caption_page (self, response):
-        self.print_status("Scanning add caption page", 2)
-        hxs = HtmlXPathSelector (response)
+    # Function: write_to_file
+    # -----------------------
+    # will write a meme (top_text, bottom_text) to a file
+    def store_in_file (self, top_text, bottom_text):
         
-        print response.body_as_unicode ()
-        bottom_text_xpath = '//textarea[@tabindex="2"]/text()'
-        top_text_xpath = hxs.select(top_text_xpath).extract()
-        print top_text
-        bottom_text = hxs.select(bottom_text_xpath).extract ()
-        print bottom_text
-        
-        #print "\n\n" + top_text + " | " + bottom_text
-        
-        return
-
     
 
 
