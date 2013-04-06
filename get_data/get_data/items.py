@@ -6,6 +6,14 @@
 from scrapy.item import Item, Field
 
 class GetDataItem(Item):
-    # define the fields for your item here like:
-    # name = Field()
+    
+	#meme type - SAP, sudden clarity clarence, etc
+	memeType = Field ()
+	
+	#the top and bottom lines of text  from the meme
+	topLine = Field ()
+	bottomLine = Field ()
+	
+	
+	
     pass
