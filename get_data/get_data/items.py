@@ -8,11 +8,11 @@ from scrapy.item import Item, Field
 class GetDataItem(Item):
     
 	#meme type - SAP, sudden clarity clarence, etc
-	memeType = Field ()
+	meme_type = Field ()
 	
 	#the top and bottom lines of text  from the meme
-	topLine = Field ()
-	bottomLine = Field ()
+	top_line = Field ()
+	bottom_line = Field ()
 	
 	
 	
