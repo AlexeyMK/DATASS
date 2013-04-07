@@ -120,7 +120,7 @@ class SentimentAnalysis:
     # will train the maxent classifier.
     def maxent_train (self, training_data):
     
-        self.classifier = MaxentClassifier.train (training_data, trace=100, max_iter=2)
+        self.classifier = MaxentClassifier.train (training_data, trace=100, max_iter=4)
         weights = self.classifier.weights()
         f = open ("Trained_Classifier_Top.obj", "w")
         pickle.dump (self.classifier, f)

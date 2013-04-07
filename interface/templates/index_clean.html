@@ -350,9 +350,6 @@ img.meme {
     width: 300px;
 }
 
-input[value="a"] {
-    size: 80;
-}
     
 
 </style>
@@ -377,17 +374,18 @@ input[value="a"] {
 <div id="wrapper">
 	<div id="header">
 		<div id="logo">
-			<h1><a href="#">D.A.T.A.S.S.</a></h1>
+			<h1><b><a href="#">D.A.T.A.S.S.</a><b></h1>
 		</div>
 	</div>
 	<div id="page">
 		<div id="content">
-			<h1>enter text here</h1>
+			<h1 style="font-size:50px;"><b>enter text here<b></h1>
             
             
 {% extends "layout.html" %}
 {% block body %}
 <script type="text/javascript">
+
   $(function() {
     var submit_form = function(e) {
       $.getJSON($SCRIPT_ROOT + '/_classify_sentiment', {
@@ -422,7 +420,7 @@ input[value="a"] {
 </script>
 
 <p>
-  <input type=text style="size:50" name=a>
+  <input type="text" style="font-size:50px; margin-top:50px"  name="a"/>
     <table style="margin-left:600px; margin-top:-100px">
         <tr><td><img class="meme" id="result1_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result1_name></span></td></tr>
         <tr><td><img class="meme" id="result2_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result2_name></span></td></tr>
