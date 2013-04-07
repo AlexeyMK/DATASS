@@ -12,14 +12,30 @@ class SentimentAnalysis:
     # initializes data structures
     def __init__ (self):
     
+        data_filenames = [
+            "../data/Foul-Bachelor-Frog data.txt",
+            "../data/Futurama-Fry data.txt",
+            "../data/Good-Guy-Greg- data.txt",
+            "../data/Insanity-Wolf data.txt",
+            "../data/Philosoraptor data.txt",
+            "../data/Scumbag-Steve data.txt",
+            "../data/Socially-Awkward-Penguin data.txt",
+            "../data/Success-Kid data.txt",
+            "../data/Paranoid-Parrot data.txt"
+        ]
+            
+    
+    
         #dict mapping words to the sentiments they contain
         self.word_sentiments = defaultdict(lambda: set())
         
         #dict mapping meme-types to their sentiment vectors (normalized)
-        self.sentiment_vectors = defaultdict(lambda: defaultdict(lambda: 0))
+        self.sentiment_vectors = defaultdict(lambda: defaultdict(lambda: 0.0))
         
+        # Get the sentiment vectors for each meme
         self.get_word_sentiments('../data/inquirerbasic.csv')
-        self.calculate_sentiment_vector ('../data/Socially-Awkward-Penguin data.txt')
+        for filename in data_filenames:
+            self.calculate_sentiment_vector (filename)
         
         pass
 
@@ -47,10 +63,17 @@ class SentimentAnalysis:
     # Function: normalize_sentiment_vector
     # ------------------------------------
     # makes sure the sentiment vector has a length of 1
-    def normalize_sentiment_vector (sentiment_vector):
-        squared_total = 0
-        for (key, value) in sentiment_vector:
-            total += value^2
+    def normalize_sentiment_vector (self, sentiment_vector):
+        squared_total = 0.0
+        for key, value in sentiment_vector.iteritems():
+            squared_total += value*value
+    
+        for key,value in sentiment_vector.iteritems():
+            sentiment_vector[key] = value / squared_total
+
+    
+    
+
 
     # Function: add_word_occurence_to_sentiment_vector
     # ------------------------------------------------
@@ -85,7 +108,9 @@ class SentimentAnalysis:
             for word in wordpunct_tokenize(bottom_text):
                 self.add_word_occurence_to_sentiment_vector (word, meme_type)
 
-        print pprint.pprint(self.sentiment_vectors[meme_type])
+        self.normalize_sentiment_vector (self.sentiment_vectors[meme_type])
+
+        print "###########", meme_type, ": #############\n" self.sentiment_vectors[meme_type])
             
 
             
