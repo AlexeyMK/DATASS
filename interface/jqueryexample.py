@@ -19,6 +19,7 @@ from operator import itemgetter
 from flask import Flask, request, render_template, jsonify
 
 image_locations = {
+
     'Annoying Facebook Girl': 'http://i.imgflip.com/1bhi.jpg',
     'First World Problems': 'http://i.imgflip.com/1bhf.jpg',
     'Forever Alone': 'http://i.imgflip.com/1bh4.jpg',
@@ -31,9 +32,10 @@ image_locations = {
     'Scumbag Steve': 'http://i.imgflip.com/1bgy.jpg',
     'Socially Awkward Penguin': 'http://i.imgflip.com/1bh0.jpg',
     'Success Kid': 'http://i.imgflip.com/1bhk.jpg',
-    'The Most Interesting Man In The World': 'http://i.imgflip.com/1bh8.jpg'
-    }
-
+    'The Most Interesting Man In The World': 'http://i.imgflip.com/1bh8.jpg',
+    'Socially Awesome Penguin': 'http://i.imgflip.com/1bgz.jpg'
+    
+}
 
 sa = SentimentAnalysis ('../process_data/Trained_Classifier.obj')
 
@@ -41,12 +43,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index_clean.html')
 
 
 @app.route("/_classify_sentiment")
 def classify_sentiment ():
     sentence = request.args.get('a', 0, type=str)
+    
+    assert False
     
     prob_dist = sa.maxent_classify_raw (sentence)
     
