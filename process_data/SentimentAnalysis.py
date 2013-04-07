@@ -2,14 +2,21 @@
 import csv
 from nltk.tokenize import word_tokenize, wordpunct_tokenize, sent_tokenize
 from nltk import ngrams
+from nltk import *
 from collections import defaultdict
 import operator
 import math
+import sys
+from nltk.classify import *
+import pickle
+from SentimentLexiconManager import SentimentLexiconManager
 
 
 
 class SentimentAnalysis:
     
+    #a dict mapping meme_type to list of instances, all in lower case
+    memes = defaultdict(lambda: [])
     
     
     # Function: load_memes
@@ -25,16 +32,14 @@ class SentimentAnalysis:
                 meme_type = fields[0]
                 top_text = wordpunct_tokenize(fields[1].lower())
                 bottom_text = wordpunct_tokenize(fields[2].lower())
-                self.memetype_lists[meme_type].append ((top_text, bottom_text))
+                self.memes[meme_type].append ((top_text, bottom_text))
     
-
-
 
 
     # Function: constructor
     # ---------------------
     # initializes data structures
-    def __init__ (self):
+    def __init__ (self, weights_filename=None):
     
         data_filenames = [
             "../data/Foul-Bachelor-Frog data.txt",
@@ -56,323 +61,129 @@ class SentimentAnalysis:
             "../data/test_data/data.txt",
             "../data/test_data/data2.txt"
         ]
+    
+        test1 = ['gay', 'friend', 'took', 'me', 'with', 'him', 'to', 'a', 'gay', 'bar', 'unbuttoned', 'an', 'extra', 'button', 'on', 'my', 'shirt', 'and', 'drank', 'for', 'free', 'all', 'night']
+        test2 = ['this', 'hand', 'sanitizer', 'makes', 'my', 'two-carat', 'diamond', 'ring', 'dirty']
+        test3 = ['ran', 'into', 'my', 'ex', 'at', 'a', 'bar', 'did', "n't", 'feel', 'a', 'goddamn', 'thing']
+        test_sentence = ['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi']
         
-        
-        #test_sentence = ['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi']
         #test_sentence = ['awkward', 'shy', 'help', 'sad', 'fuck', 'awkward', 'awkward']
         #test_sentence = ['my', 'girlfriend', 'gave', 'me', 'mouth', 'sex', 'and', 'it', 'was', 'awesome', 'because', 'she', 'has', 'huge', 'breasts']
-        test_sentence = ['I', 'won', 'cash', 'success']
+        #test_sentence = ['I', 'won', 'cash', 'success']
     
     
-        ###########################################################################################################################
-        ###################################################[ NGRAMS VECTORS ]###################################################
-        ########################################################################################################################### 
-    
-        #dict mapping memes (meme_type strings) to their text in (top, bottom) tuples
-        self.memetype_lists = defaultdict(lambda: [])
         self.load_memes (data_filenames)
-        self.get_ngrams_memetype ()
+        self.sentiment_lexicon_manager = SentimentLexiconManager ('../data/inquirerbasic.csv')
+        
+        #get the features
+        self.get_maxent_training_data ()
         
         
-        (test_unigram_vector, test_bigram_vector) = self.get_ngrams_sentence(test_sentence)
-        print test_unigram_vector
-        print test_bigram_vector
+        #encoding = MaxentFeatureEncodingI.encode (self.maxent_training_data)
         
-        matches_all_uni = {}
-        matches_top_uni = {}
-        matches_bottom_uni = {}
-        for v in self.memetype_unigrams_top:
-            cosine = self.calculate_cosine_similarity (test_unigram_vector, self.memetype_unigrams_top[v])
-            matches_top_uni[v] = cosine
-        sorted_top_uni = sorted(matches_top_uni.iteritems(), key=operator.itemgetter(1))
-        
-        for v in self.memetype_unigrams_bottom:
-            cosine = self.calculate_cosine_similarity (test_unigram_vector, self.memetype_unigrams_bottom[v])
-            matches_bottom_uni[v] = cosine
-        sorted_bottom_uni = sorted(matches_bottom_uni.iteritems(), key=operator.itemgetter(1))
+        if weights_filename:
+            #load weighst from a user-specified file
+            self.maxent_load (weights_filename)
+        else:
+            #train the maxent model
+            self.maxent_train (self.maxent_training_data)
     
-        for v in self.memetype_unigrams_all:
-            cosine = self.calculate_cosine_similarity (test_unigram_vector, self.memetype_unigrams_all[v])
-            matches_all_uni[v] = cosine
-        sorted_all_uni = sorted(matches_all_uni.iteritems(), key=operator.itemgetter(1))
-    
-    
-        print "########## UNIGRAM COSINE SIMILARITY ###########\n"
-        print "#### TOP ALL:"
-        for v in sorted_all_uni:
-            print v[0], ": ", v[1]
-        
-        print "#### TOP TOP:"
-        for v in sorted_top_uni:
-            print v[0], ": ", v[1]
             
-        print "#### TOP BOTTOM:"
-        for v in sorted_bottom_uni:
-            print v[0], ": ", v[1]
+        #test classification
+        print "### test_sentence: ", test_sentence
+        probdist = self.maxent_classify (test_sentence)
+        for c in probdist.samples ():
+            print "     ", c, ": ", probdist.prob(c)
+        
+        print "### test1: ", test1,
+        probdist = self.maxent_classify (test1)
+        for c in probdist.samples ():
+            print "     ", c, ": ", probdist.prob(c)
+
+        print "### test2: ", test2,
+        probdist = self.maxent_classify (test2)
+        for c in probdist.samples ():
+            print "     ", c, ": ", probdist.prob(c)
     
+        print "### test3: ", test3,
+        probdist = self.maxent_classify (test3)
+        for c in probdist.samples ():
+            print "     ", c, ": ", probdist.prob(c)
+
+
+
+        #print "test2: ", self.maxent_classify (test2).samples (), "\n\n"
+        #print "test3: ", self.maxent_classify (test3).samples (), "\n\n"
+        #self.sentiment_lexicon_manager = SentimentLexiconManager (self.memes)
+        
+
+
+    # Function: extract_ngram_features
+    # --------------------------
+    # given a list of words (that form a sentence), return a dict of words mapping to true that occur in the example.
+    # (i.e. we are treating it as a bag of words. this is for straight unigrams.)
+    # its like a compressed version of the entire vector of features, which are boolean values for the presence/absence of certain words.
+    def extract_ngram_features (self, sentence):
+        return dict([(token, True) for token in sentence])
     
-        
-        ###########################################################################################################################
-        ###################################################[ SENTIMENT VECTORS ]###################################################
-        ###########################################################################################################################         
 
-        #dict mapping words to the sentiments they contain
-        self.word_sentiments = defaultdict(lambda: set())
+    # Function: get_maxent_training_data
+    # ----------------------------------
+    # fills self.maxent_training_data with the appropriate values
+    def get_maxent_training_data (self):
+        self.maxent_training_data = []
+        for meme_type, instances in self.memes.iteritems ():
+            for instance in instances:
         
-        #dict mapping meme-types to their sentiment vectors (normalized)
-        self.sentiment_vectors = defaultdict(lambda: defaultdict(lambda: 0.0))
-        self.sentiment_vectors_top = defaultdict(lambda: defaultdict(lambda: 0.0))
-        self.sentiment_vectors_bottom = defaultdict(lambda: defaultdict(lambda: 0.0))
-        
-        # Get the sentiment vectors for each meme
-        self.get_word_sentiments('../data/inquirerbasic.csv')
-        for filename in data_filenames:
-            self.calculate_memetype_sentiment_vector (filename)
-        
-        test_sentiment_vector = self.calculate_sentence_sentiment_vector(test_sentence)
-
-
-        matches_all = {}
-        matches_top = {}
-        matches_bottom = {}
-        
-        
-        for v in self.sentiment_vectors:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors[v], test_sentiment_vector)
-            matches_all[v] = cosine
-        sorted_all = sorted(matches_all.iteritems(), key=operator.itemgetter(1))
-        
-        for v in self.sentiment_vectors_top:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors_top[v], test_sentiment_vector)
-            matches_top[v] = cosine
-        sorted_top = sorted(matches_top.iteritems(), key=operator.itemgetter(1))
-        
-        for v in self.sentiment_vectors_bottom:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors_bottom[v], test_sentiment_vector)
-            matches_bottom[v] = cosine
-        sorted_bottom = sorted(matches_bottom.iteritems(), key=operator.itemgetter(1))
-        
+                total = instance[0] + instance[1]
+                bag_of_words = self.extract_ngram_features(total)
+                sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (total)
     
+                features = dict(bag_of_words.items () + sentiment_vector.items())
+                self.maxent_training_data.append( (features, meme_type))
+        return
+
+
+    # Function: maxent_train
+    # ----------------------
+    # will train the maxent classifier.
+    def maxent_train (self, training_data):
     
-        for v in self.sentiment_vectors:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors[v], test_sentiment_vector)
-            matches_all[v] = cosine
-        sorted_all = sorted(matches_all.iteritems(), key=operator.itemgetter(1))
-
-        for v in self.sentiment_vectors_top:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors_top[v], test_sentiment_vector)
-            matches_top[v] = cosine
-        sorted_top = sorted(matches_top.iteritems(), key=operator.itemgetter(1))
-       
-        for v in self.sentiment_vectors_bottom:
-            cosine = self.calculate_cosine_similarity (self.sentiment_vectors_bottom[v], test_sentiment_vector)
-            matches_bottom[v] = cosine
-        sorted_bottom = sorted(matches_bottom.iteritems(), key=operator.itemgetter(1))
-            
-        print "########## SENTIMENT VECTOR COSINE SIMILARITY ###########\n"
-        print "#### TOP ALL:"
-        for v in sorted_all:
-            print v[0], ": ", v[1]
-        
-        print "#### TOP TOP:"
-        for v in sorted_top:
-            print v[0], ": ", v[1]
-            
-        print "#### TOP BOTTOM:"
-        for v in sorted_bottom:
-            print v[0], ": ", v[1]
+        self.classifier = MaxentClassifier.train (training_data, trace=100, max_iter=2)
+        weights = self.classifier.weights()
+        f = open ("Trained_Classifier.obj", "w")
+        pickle.dump (self.classifier, f)
+        f.close ()
 
 
-
-
-    ###########################################################################################################################
-    ###################################################[ SENTIMENT VECTORS ]###################################################
-    ###########################################################################################################################    
-
-    # Function: get_word_sentiments
-    # -----------------------------
-    # fills self.word_sentiments with a dict that maps each word to a set of sentiments.
-    def get_word_sentiments (self, filename):
-
-        reader = csv.reader(open(filename, 'r'))
-        
-        #emotions will map index to word name
-        emotions = reader.next ()
-
-        i = 0
-        for line in reader:
-            if i > 0:
-                word = line[0].split('#')[0].lower()
-                sentiments = {emotions[i] for i in range(2, len(line)) if line[i]}
-                self.word_sentiments[word] = self.word_sentiments[word] | sentiments
-            i += 1
-
-
-    # Function: normalize_sentiment_vector
-    # ------------------------------------
-    # makes sure the sentiment vector has a length of 1
-    def normalize_sentiment_vector (self, sentiment_vector):
-        squared_total = 0.0
-        for key, value in sentiment_vector.iteritems():
-            squared_total += value*value
-    
-        squared_total = math.sqrt(squared_total)
-        for key,value in sentiment_vector.iteritems():
-            sentiment_vector[key] = value / squared_total
-
-
-    # Function: add_word_occurence_to_sentiment_vector
-    # ------------------------------------------------
-    # given a word and the meme-type under which it occurs, this function will add it's represented
-    # sentiments to the meme-type's sentiment vector. discards the word if it isn't in our sentiment corpus
-    def add_word_occurence_to_sentiment_vector (self, word, sentiment_vector):
-        
-        word = word.lower()
-        this_word_sentiments = self.word_sentiments[word]
-        for sentiment in this_word_sentiments:
-            sentiment_vector[sentiment] += 1
-        
-
-    # Function: calculate_memetype_sentiment_vector
-    # ------------------------------------
-    # enter in the filename of a meme, it will calculate the sentiment vector for it.
-    def calculate_memetype_sentiment_vector (self, filename):
+    # Function: maxent_load
+    # ---------------------
+    # will load parameters from a file, stores them in self.lambdas
+    def maxent_load (self, filename):
         f = open(filename, 'r')
+        self.classifier = pickle.load(f)
+        f.close ()
+
+    # Function: maxent_classify
+    # -------------------------
+    # given a sentence, this function will classify it
+    def maxent_classify (self, sentence):
+
+        bag_of_words = self.extract_ngram_features(sentence)
+        sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (sentence)
+        features = dict(bag_of_words.items () + sentiment_vector.items())
         
-        meme_type = ''
-        contents = f.readlines()
-        for entry in contents:
+
+        return self.classifier.prob_classify(features)
             
-            fields = [s.strip() for s in entry.split("|")]
-            meme_type = fields[0]
-            top_text = fields[1]
-            bottom_text = fields[2]
-
-            for word in wordpunct_tokenize(top_text):
-                self.add_word_occurence_to_sentiment_vector (word, self.sentiment_vectors[meme_type])
-                self.add_word_occurence_to_sentiment_vector (word, self.sentiment_vectors_top[meme_type])
-
-            for word in wordpunct_tokenize(bottom_text):
-                self.add_word_occurence_to_sentiment_vector (word, self.sentiment_vectors[meme_type])
-                self.add_word_occurence_to_sentiment_vector (word, self.sentiment_vectors_bottom[meme_type])
-                    
-        self.normalize_sentiment_vector (self.sentiment_vectors[meme_type])
-        self.normalize_sentiment_vector (self.sentiment_vectors_top[meme_type])
-        self.normalize_sentiment_vector (self.sentiment_vectors_bottom[meme_type])
-        #print "\n\n###########", meme_type, ": #############\n", self.sentiment_vectors[meme_type]
-            
-            
-    
-    # Function: calculate_sentence_sentiment_vectors
-    # ----------------------------------------------
-    # given a list of words that make up a sentence, this function will return a sentiment vector
-    def calculate_sentence_sentiment_vector (self, sentence):
-
-        sentiment_vector = defaultdict(lambda: 0.0)
-        for word in sentence:
-            self.add_word_occurence_to_sentiment_vector (word.lower(), sentiment_vector)
-        self.normalize_sentiment_vector (sentiment_vector)
-        #print "############## sentence vector: ###############\n"
-        return sentiment_vector
-    
-
-    # Function: calculate_cosine_similarity
-    # -------------------------------------
-    # basically take the dot-product between two vectors in order to find the theta between them
-    def calculate_cosine_similarity (self, sentence_vector, meme_type_vector):
-
-        sum = 0.0
-        for key, value in sentence_vector.iteritems ():
-            sum += sentence_vector[key] * meme_type_vector[key]
-        return sum
-            
-
-
-    ###########################################################################################################################
-    ###################################################[ NGRAMS ]##############################################################
-    ###########################################################################################################################
-    
-    #dict mapping memetypes to dicts that map unigrams to their frequency
-    memetype_unigrams_top = defaultdict(lambda: defaultdict(lambda: 0.0))
-    memetype_unigrams_bottom = defaultdict(lambda: defaultdict(lambda: 0.0))
-    memetype_unigrams_all = defaultdict(lambda: defaultdict(lambda: 0.0))
-    
-    memetype_bigrams_top = defaultdict(lambda: defaultdict(lambda: 0.0))
-    memetype_bigrams_bottom = defaultdict(lambda: defaultdict(lambda: 0.0))
-    memetype_bigrams_all = defaultdict(lambda: defaultdict(lambda: 0.0))
-
-
-    # Function: add_ngrams
-    # --------------------
-    # will add in the ngrams to the memetype_(uni|bi)grams dicts
-    def add_ngrams(self, key, top_unigrams, bottom_unigrams, all_unigrams, top_bigrams, bottom_bigrams, all_bigrams):
-    
-        for unigram in top_unigrams:
-            self.memetype_unigrams_top[key][unigram] += 1
-            self.memetype_unigrams_all[key][unigram] += 1
-        for unigram in bottom_unigrams:
-            self.memetype_unigrams_bottom[key][unigram] += 1
-            self.memetype_unigrams_all[key][unigram] += 1
-
-        for bigram in top_bigrams:
-            self.memetype_bigrams_top[key][bigram] += 1
-            self.memetype_bigrams_all[key][bigram] += 1
-        for bigram in bottom_bigrams:
-            self.memetype_bigrams_bottom[key][bigram] += 1
-            self.memetype_bigrams_all[key][bigram] += 1
-    
-
-    # Function: get_ngrams_memetype
-    # -----------------------------
-    # given a memetype filename, this function will extract all uni- and bigrams and their counts.
-    def get_ngrams_memetype (self):
-        for key in self.memetype_lists:
-            for meme in self.memetype_lists[key]:
-
-                top_unigrams = meme[0]
-                bottom_unigrams = meme[1]
-                all_unigrams = top_unigrams + bottom_unigrams
-
-                top_bigrams = ngrams (meme[0], 2)
-                bottom_bigrams = ngrams (meme[1], 2)
-                all_bigrams = top_bigrams + bottom_bigrams
-
-                self.add_ngrams(key, top_unigrams, bottom_unigrams, all_unigrams, top_bigrams, bottom_bigrams, all_bigrams)
-
-            self.normalize_sentiment_vector (self.memetype_unigrams_top[key])
-            self.normalize_sentiment_vector (self.memetype_bigrams_top[key])
-            self.normalize_sentiment_vector (self.memetype_unigrams_bottom[key])
-            self.normalize_sentiment_vector (self.memetype_bigrams_bottom[key])
-            self.normalize_sentiment_vector (self.memetype_unigrams_all[key])
-            self.normalize_sentiment_vector (self.memetype_bigrams_all[key])
-
-
-    # Function: get_ngrams_sentence
-    # -----------------------------
-    # computes unigrams and bigrams for a sentence
-    def get_ngrams_sentence (self, sentence):
-
-        unigram_vector = defaultdict(lambda: 0.0)
-        bigram_vector = defaultdict(lambda: 0.0)
-        unigrams = sentence
-        bigrams = ngrams(sentence, 2)
-        for unigram in unigrams:
-            unigram_vector[unigram] += 1
-        for bigram in bigrams:
-            bigram_vector[bigram] += 1
-            
-        self.normalize_sentiment_vector (unigram_vector)
-        self.normalize_sentiment_vector (bigram_vector)
-    
-        
-        return (unigram_vector, bigram_vector)
-
-
-
 
 
 if __name__ == "__main__":
-    sa = SentimentAnalysis()
+    if len(sys.argv) > 1:
+        print "Weights Filename: ", sys.argv[1]
+        sa = SentimentAnalysis (sys.argv[1])
+    else:
+        sa = SentimentAnalysis()
     
 
         
