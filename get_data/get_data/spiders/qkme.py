@@ -4,6 +4,7 @@ from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
 from selenium import selenium
 import time
+import csv
 
 # Class: QkmeSpider
 # -----------------
@@ -12,15 +13,21 @@ import time
 class QkmeSpider (BaseSpider):
     name = "qkme"
     allowed_domains = ["quickmeme.com"]
-    start_urls = ["http://www.quickmeme.com/Socially-Awkward-Penguin/popular/81"]
+    start_urls = ["http://www.quickmeme.com/Socially-Awkward-Penguin/"]
     
-    def __init__ (self):
+    def __init__ (self, meme_name="Socially-Awkward-Penguin"):
 
         #list to contain the absolute links to each instance page
         self.instance_page_urls = []
         self.baseURL = 'http://www.quickmeme.com'
         self.selenium = selenium("localhost", 4444, "*chrome", "http://www.quickmeme.com")
         self.selenium.start ()
+        
+        self.start_urls[0] = "http://www.quickmeme.com/" + meme_name + "/"
+        
+        self.datafile_name = meme_name + " data.txt"
+        self.datafile = open(self.datafile_name, 'w')
+        
         pass
     
     
@@ -93,22 +100,29 @@ class QkmeSpider (BaseSpider):
         
             sel = self.selenium
             sel.open(self.baseURL + url)
-            time.sleep(2.5)
+            time.sleep(2)
             
+            meme_type_xpath = '//a[@id="meme_name"]/text()'
             top_text_xpath = '//textarea[@tabindex="1"]/text()'
             bottom_text_xpath = '//textarea[@tabindex="2"]/text()'
             
+            meme_type = hxs.select(meme_type_xpath).extract ()[0]
             top_text = sel.get_text(top_text_xpath)
             bottom_text = sel.get_text(bottom_text_xpath)
-        
+            
+            self.store_in_file (meme_type, top_text, bottom_text)
 
+        
 
     # Function: write_to_file
     # -----------------------
     # will write a meme (top_text, bottom_text) to a file
-    def store_in_file (self, top_text, bottom_text):
+    def store_in_file (self, meme_type, top_text, bottom_text):
         
-    
+        self.datafile.write("%s | %s | %s\n" % (meme_type, top_text, bottom_text) )
+        
+        
+        pass
 
 
 
