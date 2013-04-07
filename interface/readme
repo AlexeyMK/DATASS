@@ -1,0 +1,19 @@
+Readme
+======
+
+This is a simple example of using Flask, CoffeeScript and jQuery to make and handle AJAX
+requests.
+
+
+Running the example
+-------------------
+
+To run the example, Python must be installed with the Flask library.
+
+Run in your favourite terminal (or command prompt for windows users):
+
+$ python app.py
+
+Now visit localhost:5000 with your favourite web browser.
+
+Note: JavaScript must be enabled on your browser for the example to work.

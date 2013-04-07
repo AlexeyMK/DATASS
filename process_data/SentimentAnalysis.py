@@ -62,11 +62,10 @@ class SentimentAnalysis:
             "../data/test_data/data2.txt"
         ]
     
-        test1 = ['gay', 'friend', 'took', 'me', 'with', 'him', 'to', 'a', 'gay', 'bar', 'unbuttoned', 'an', 'extra', 'button', 'on', 'my', 'shirt', 'and', 'drank', 'for', 'free', 'all', 'night']
-        test2 = ['this', 'hand', 'sanitizer', 'makes', 'my', 'two-carat', 'diamond', 'ring', 'dirty']
-        test3 = ['ran', 'into', 'my', 'ex', 'at', 'a', 'bar', 'did', "n't", 'feel', 'a', 'goddamn', 'thing']
-        test_sentence = ['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi']
-        
+        #test1 = ['gay', 'friend', 'took', 'me', 'with', 'him', 'to', 'a', 'gay', 'bar', 'unbuttoned', 'an', 'extra', 'button', 'on', 'my', 'shirt', 'and', 'drank', 'for', 'free', 'all', 'night']
+        #test2 = ['this', 'hand', 'sanitizer', 'makes', 'my', 'two-carat', 'diamond', 'ring', 'dirty']
+        #test3 = ['ran', 'into', 'my', 'ex', 'at', 'a', 'bar', 'did', "n't", 'feel', 'a', 'goddamn', 'thing']
+        #test_sentence = ['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi']
         #test_sentence = ['awkward', 'shy', 'help', 'sad', 'fuck', 'awkward', 'awkward']
         #test_sentence = ['my', 'girlfriend', 'gave', 'me', 'mouth', 'sex', 'and', 'it', 'was', 'awesome', 'because', 'she', 'has', 'huge', 'breasts']
         #test_sentence = ['I', 'won', 'cash', 'success']
@@ -87,34 +86,6 @@ class SentimentAnalysis:
         else:
             #train the maxent model
             self.maxent_train (self.maxent_training_data)
-    
-            
-        #test classification
-        print "### test_sentence: ", test_sentence
-        probdist = self.maxent_classify (test_sentence)
-        for c in probdist.samples ():
-            print "     ", c, ": ", probdist.prob(c)
-        
-        print "### test1: ", test1,
-        probdist = self.maxent_classify (test1)
-        for c in probdist.samples ():
-            print "     ", c, ": ", probdist.prob(c)
-
-        print "### test2: ", test2,
-        probdist = self.maxent_classify (test2)
-        for c in probdist.samples ():
-            print "     ", c, ": ", probdist.prob(c)
-    
-        print "### test3: ", test3,
-        probdist = self.maxent_classify (test3)
-        for c in probdist.samples ():
-            print "     ", c, ": ", probdist.prob(c)
-
-
-
-        #print "test2: ", self.maxent_classify (test2).samples (), "\n\n"
-        #print "test3: ", self.maxent_classify (test3).samples (), "\n\n"
-        #self.sentiment_lexicon_manager = SentimentLexiconManager (self.memes)
         
 
 
@@ -173,8 +144,18 @@ class SentimentAnalysis:
         sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (sentence)
         features = dict(bag_of_words.items () + sentiment_vector.items())
         
-
         return self.classifier.prob_classify(features)
+
+
+    # Function: maxent_classify_raw
+    # -----------------------------
+    # given a raw sentence, this will tokenize it then classify it.
+    def maxent_classify_raw (self, sentence_raw):
+        
+        sentence = wordpunct_tokenize(sentence_raw)
+        return self.maxent_classify(sentence)
+        
+        pass
             
 
 
