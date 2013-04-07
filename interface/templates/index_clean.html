@@ -376,7 +376,8 @@ ul.style2 a:hover {
 			<h1>enter text here</h1>
             
             
-            
+{% extends "layout.html" %}
+{% block body %}
 <script type="text/javascript">
   $(function() {
     var submit_form = function(e) {
@@ -399,6 +400,7 @@ ul.style2 a:hover {
       });
       return false;
     };
+    
 
     $('a#calculate').bind('click', submit_form);
 
@@ -414,17 +416,18 @@ ul.style2 a:hover {
 
 <p>
   <input type=text size="40" name=a>
-    <table>
+    <table float="left">
         <tr><td><img class="meme" id="result1_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result1_name></span></td></tr>
         <tr><td><img class="meme" id="result2_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result2_name></span></td></tr>
         <tr><td><img class=meme id=result3_image src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result3_name></span></td></tr>
         <tr><td><img class=meme id=result4_image src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result4_name></span></td></tr>
     </table>
-<p><a href=# id=calculate>calculate server side</a>
+<p><a href="#" id="calculate">calculate server side</a>
+{% endblock %}
       
             
 		</div>
-		<div id="sidebar">
+		<div id="sidebar" width="600">
 			<div id="tbox1">
 				<h1><b>image suggestions: <b></h1>
 				<ul class="style2">

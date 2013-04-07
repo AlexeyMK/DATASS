@@ -50,8 +50,6 @@ def index():
 def classify_sentiment ():
     sentence = request.args.get('a', 0, type=str)
     
-    assert False
-    
     prob_dist = sa.maxent_classify_raw (sentence)
     
     probabilities = {}
