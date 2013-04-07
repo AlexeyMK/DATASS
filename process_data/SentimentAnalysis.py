@@ -162,10 +162,17 @@ class SentimentAnalysis:
         sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (sentence)
         features = dict(bag_of_words.items () + sentiment_vector.items())
         
-        
+	prob_all = self.classifier_all.prob_classify(features)
+	prob_top = self.classifier_top.prob_classify(features)
+	prob_bottom = self.classifier_bottom.prob_classify(features)
+	#for p in prob_all.samples ():
+		#prob_all.prob[p] = prob_top.prob(p) + 3*prob_bottom.prob(p)
+		#print prob_all(p)
+
         #return self.classifier_all.prob_classify(features)
         #return self.classifier_top.prob_classify (features)
-        return self.classifier_bottom.prob_classify (features)
+        #return self.classifier_bottom.prob_classify (features)
+	return [prob_all, prob_top, prob_bottom]
 
 
     # Function: maxent_classify_raw

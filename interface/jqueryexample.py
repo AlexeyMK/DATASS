@@ -53,11 +53,11 @@ def index():
 def classify_sentiment ():
     sentence = request.args.get('a', 0, type=str)
     
-    prob_dist = sa.maxent_classify_raw (sentence)
-    
+    prob_dist_combo = sa.maxent_classify_raw (sentence)
+    prob_dist = prob_dist_combo[0]
     probabilities = {}
     for type in prob_dist.samples ():
-        probabilities[type] = prob_dist.prob(type)
+        probabilities[type] = prob_dist_combo[0].prob(type) + prob_dist_combo[1].prob(type) + 3*prob_dist_combo[2].prob(type)
     
     rankings = []
     for key, value in probabilities.iteritems ():
