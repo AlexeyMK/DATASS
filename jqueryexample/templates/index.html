@@ -6,7 +6,14 @@
       $.getJSON($SCRIPT_ROOT + '/_classify_sentiment', {
         a: $('input[name="a"]').val()
       }, function(data) {
-        $('#result').text(data.result);
+        
+        var result = jQuery.parseJSON (data.result)
+      
+        $('#result1').text(result[0]);
+        $('#result2').text(result[1]);
+        $('#result3').text(result[2]);
+        $('#result4').text(result[3]);
+        $('#result5').attr("src", "http://a.kym-cdn.com/assets/kym.jpg?1278993523")
         $('input[name=a]').focus().select();
       });
       return false;
@@ -26,6 +33,12 @@
 <h1>jQuery Example</h1>
 <p>
   <input type=text size=20 name=a>
-  <span id=result>?</span>
+    <table>
+        <tr><td><span id=result1>?</span></tr></td>
+        <tr><td><span id=result2>?</span></tr></td>
+        <tr><td><span id=result3>?</span></tr></td>
+        <tr><td><span id=result4>?</span></tr></td>
+        <tr><td><img id=result5 src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></tr></td>
+    </table>
 <p><a href=# id=calculate>calculate server side</a>
 {% endblock %}

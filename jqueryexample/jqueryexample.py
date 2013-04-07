@@ -15,7 +15,12 @@ from SentimentAnalysis import SentimentAnalysis
 import pickle
 import itertools
 import json
+from operator import itemgetter
 from flask import Flask, request, render_template, jsonify
+
+
+image_locations = {}
+
 
 sa = SentimentAnalysis ('../process_data/Trained_Classifier.obj')
 
@@ -35,12 +40,17 @@ def classify_sentiment ():
     probabilities = {}
     for type in prob_dist.samples ():
         probabilities[type] = prob_dist.prob(type)
+    
+    rankings = []
+    for key, value in probabilities.iteritems ():
+        rankings.append ((key, value))
+    sorted_rankings = sorted(rankings, key=itemgetter(1), reverse=True)
 
-    topfour_tuples = itertools.islice(probabilities.iteritems(), 4)
-    topfour = [m[0] + ("%f - " % m[1]) for m in topfour_tuples]
+    r = [s[0] + (" - %f" % s[1]) for s in sorted_rankings]
 
-    topfour_send = json.dumps (topfour)
-    return jsonify(result=topfour_send)
+    packed_rankings = json.dumps (r)
+
+    return jsonify(result=packed_rankings)
 
 if __name__ == '__main__':
 
