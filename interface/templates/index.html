@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block body %}
+<script type=text/javascript>
+  $(function() {
+    var submit_form = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/_classify_text', {
+        a: $('input[sentence="sentence"]').val(),
+      }, function(data) {
+        $('#result').text(data.result);
+        $('input[name=sentence]').focus().select();
+      });
+      return false;
+    };
+
+    $('a#classify').bind('click', submit_form);
+
+    $('input[type=text]').bind('keydown', function(e) {
+      if (e.keyCode == 13) {
+        submit_form(e);
+      }
+    });
+
+    $('input[name=a]').focus();
+  });
+</script>
+<h1>jQuery Example</h1>
+<p>
+  <input type=text size=5 name=sentence>: 
+  <span id=result>?</span>
+<p><a href=# id=classify>classify sentence</a>
+{% endblock %}
