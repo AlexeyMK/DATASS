@@ -38,8 +38,10 @@ class SentimentAnalysis:
             self.calculate_memetype_sentiment_vector (filename)
         
         
-        sv = self.calculate_sentence_sentiment_vector(['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi'])
-        
+        #sv = self.calculate_sentence_sentiment_vector(['I', 'Went', 'to', 'the', 'store', 'and', 'saw', 'a', 'cute', 'girl', 'but', 'i', 'was', 'too', 'shy', 'too', 'even', 'say', 'hi'])
+        sv = self.calculate_sentence_sentiment_vector(['awkward', 'shy', 'help', 'sad', 'fuck', 'awkward', 'awkward'])
+
+    
         cs = []
         for v in self.sentiment_vectors:
             cosine = self.calculate_cosine_similarity (self.sentiment_vectors[v], sv)
