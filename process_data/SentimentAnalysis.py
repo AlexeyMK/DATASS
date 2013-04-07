@@ -39,7 +39,7 @@ class SentimentAnalysis:
     # Function: constructor
     # ---------------------
     # initializes data structures
-    def __init__ (self, weights_filename=None):
+    def __init__ (self, weights_filenames=None):
     
         data_filenames = [
             "../data/Foul-Bachelor-Frog data.txt",
@@ -79,9 +79,9 @@ class SentimentAnalysis:
         
         #encoding = MaxentFeatureEncodingI.encode (self.maxent_training_data)
         
-        if weights_filename:
+        if weights_filenames:
             #load weighst from a user-specified file
-            self.maxent_load (weights_filename)
+            self.maxent_load (weights_filenames)
         else:
             #train the maxent model
             self.maxent_train (self.maxent_training_data)
@@ -130,10 +130,28 @@ class SentimentAnalysis:
     # Function: maxent_load
     # ---------------------
     # will load parameters from a file, stores them in self.lambdas
-    def maxent_load (self, filename):
-        f = open(filename, 'r')
-        self.classifier = pickle.load(f)
-        f.close ()
+    def maxent_load (self, filenames):
+
+        filename_all = filenames[0]
+        filename_top = filenames[1]
+        filename_bottom = filenames[2]
+        
+        f_all = open(filename_all, 'r')
+        self.classifier_all = pickle.load(f_all)
+        print "loaded all..."
+        
+        f_top = open(filename_top, 'r')
+        self.classifier_top = pickle.load(f_top)
+        print "loaded top..."
+        
+        f_bottom = open(filename_all, 'r')
+        self.classifier_bottom = pickle.load(f_bottom)
+        print "loaded bottom..."
+    
+        f_all.close ()
+        f_top.close ()
+        f_bottom.close ()
+    
 
     # Function: maxent_classify
     # -------------------------
@@ -144,7 +162,10 @@ class SentimentAnalysis:
         sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (sentence)
         features = dict(bag_of_words.items () + sentiment_vector.items())
         
-        return self.classifier.prob_classify(features)
+        
+        #return self.classifier_all.prob_classify(features)
+        #return self.classifier_top.prob_classify (features)
+        return self.classifier_bottom.prob_classify (features)
 
 
     # Function: maxent_classify_raw
@@ -161,8 +182,12 @@ class SentimentAnalysis:
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        print "Weights Filename: ", sys.argv[1]
-        sa = SentimentAnalysis (sys.argv[1])
+        if (sys.argv[1] == 'load'):
+            print "Using Pretrained Classifiers: "
+            filename_all = 'Trained_Classifier.obj'
+            filename_top = 'Trained_Classifier_Top.obj'
+            filename_bottom = 'Trained_Classifier_Bottom.obj'
+            sa = SentimentAnalysis ([filename_all, filename_top, filename_bottom])
     else:
         sa = SentimentAnalysis()
     
