@@ -37,7 +37,10 @@ image_locations = {
     
 }
 
-sa = SentimentAnalysis ('../process_data/Trained_Classifier.obj')
+filename_all = '../process_data/Trained_Classifier.obj'
+filename_top = '../process_data/Trained_Classifier_Top.obj'
+filename_bottom = '../process_data/Trained_Classifier_Bottom.obj'
+sa = SentimentAnalysis (filename_all, filename_top, filename_bottom)
 
 app = Flask(__name__)
 

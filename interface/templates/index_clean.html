@@ -433,7 +433,24 @@ $("#a").keypress(function(event) {
   });
   
 function KeyJustPressed (event) {
-    alert ("key just pressed!")
+    var submit_form = function(e) {
+      $.getJSON($SCRIPT_ROOT + '/_classify_sentiment', {
+        a: $('input[name="a"]').val()
+      }, function(data) {
+        
+        var result = jQuery.parseJSON (data.result)
+        
+        $('#result1_image').attr("src", result[0][1]);
+        $('#result2_image').attr("src", result[1][1]);
+        $('#result3_image').attr("src", result[2][1]);
+        
+        $('#result1_name').text(result[0][0]);
+        $('#result2_name').text(result[1][0]);
+        $('#result3_name').text(result[2][0]);
+        $('input[name=a]').focus().select();
+      });
+      return false;
+    };
 }
 </script>
 

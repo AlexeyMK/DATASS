@@ -39,7 +39,7 @@ class SentimentAnalysis:
     # Function: constructor
     # ---------------------
     # initializes data structures
-    def __init__ (self, weights_filenames=None):
+    def __init__ (self, filename_all=None, filename_top=None, filename_bottom=None):
     
         data_filenames = [
             "../data/Foul-Bachelor-Frog data.txt",
@@ -79,9 +79,9 @@ class SentimentAnalysis:
         
         #encoding = MaxentFeatureEncodingI.encode (self.maxent_training_data)
         
-        if weights_filenames:
+        if filename_all and filename_top and filename_bottom:
             #load weighst from a user-specified file
-            self.maxent_load (weights_filenames)
+            self.maxent_load (filename_all, filename_top, filename_bottom)
         else:
             #train the maxent model
             self.maxent_train (self.maxent_training_data)
@@ -130,12 +130,12 @@ class SentimentAnalysis:
     # Function: maxent_load
     # ---------------------
     # will load parameters from a file, stores them in self.lambdas
-    def maxent_load (self, filenames):
+    def maxent_load (self, filename_all, filename_top, filename_bottom):
 
-        filename_all = filenames[0]
-        filename_top = filenames[1]
-        filename_bottom = filenames[2]
         
+        print filename_all
+        print filename_top
+        print filename_bottom
         f_all = open(filename_all, 'r')
         self.classifier_all = pickle.load(f_all)
         print "loaded all..."
@@ -187,7 +187,7 @@ if __name__ == "__main__":
             filename_all = 'Trained_Classifier.obj'
             filename_top = 'Trained_Classifier_Top.obj'
             filename_bottom = 'Trained_Classifier_Bottom.obj'
-            sa = SentimentAnalysis ([filename_all, filename_top, filename_bottom])
+            sa = SentimentAnalysis (filename_all, filename_top, filename_bottom)
     else:
         sa = SentimentAnalysis()
     
