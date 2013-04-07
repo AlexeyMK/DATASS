@@ -17,6 +17,9 @@ Released   : 20130326
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <link href="http://fonts.googleapis.com/css?family=Dosis:300,400,500,600,700" rel="stylesheet" type="text/css" />
+<script src="http://api.jquery.com/resources/events.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+
 
 <style type="text/css">
 html, body {
@@ -386,6 +389,17 @@ img.meme {
 {% block body %}
 <script type="text/javascript">
 
+$("#a").keypress(function(event) {
+  if ( event.which == 13 ) {
+     event.preventDefault();
+   }
+   xTriggered++;
+   var msg = "Handler for .keypress() called " + xTriggered + " time(s).";
+  $.print( msg, "html" );
+  $.print( event );
+  alert ("shit just went down")
+});
+
   $(function() {
     var submit_form = function(e) {
       $.getJSON($SCRIPT_ROOT + '/_classify_sentiment', {
@@ -417,10 +431,14 @@ img.meme {
 
     $('input[name=a]').focus();
   });
+  
+function KeyJustPressed (event) {
+    alert ("key just pressed!")
+}
 </script>
 
 <p>
-  <input type="text" style="font-size:50px; margin-top:50px"  name="a"/>
+  <input type="text" style="font-size:50px; margin-top:50px"  name="a" onkeypress="return KeyJustPressed(event)"/>
     <table style="margin-left:600px; margin-top:-100px">
         <tr><td><img class="meme" id="result1_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result1_name></span></td></tr>
         <tr><td><img class="meme" id="result2_image" src="http://4.bp.blogspot.com/-IHmZeGAA2pw/Tw9HHzmr2RI/AAAAAAAAB6I/wcW9a5I8Wk0/s1600/troll%2Bface.jpg"></td><td><span id=result2_name></span></td></tr>

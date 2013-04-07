@@ -105,10 +105,10 @@ class SentimentAnalysis:
         for meme_type, instances in self.memes.iteritems ():
             for instance in instances:
         
-                top_text = instance[0]
+                bottom_text = instance[0]
                 
-                bag_of_words = self.extract_ngram_features(top_text)
-                sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (top_text)
+                bag_of_words = self.extract_ngram_features(bottom_text)
+                sentiment_vector = self.sentiment_lexicon_manager.get_sentiment_vector (bottom_text)
     
                 features = dict(bag_of_words.items () + sentiment_vector.items())
                 self.maxent_training_data.append( (features, meme_type))
@@ -122,7 +122,7 @@ class SentimentAnalysis:
     
         self.classifier = MaxentClassifier.train (training_data, trace=100, max_iter=4)
         weights = self.classifier.weights()
-        f = open ("Trained_Classifier_Top.obj", "w")
+        f = open ("Trained_Classifier_Bottom.obj", "w")
         pickle.dump (self.classifier, f)
         f.close ()
 
