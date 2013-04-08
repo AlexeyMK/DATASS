@@ -10,8 +10,7 @@
 """
 import sys
 import os
-sys.path.append (os.path.abspath ('../process_data/'))
-from SentimentAnalysis import SentimentAnalysis
+from process_data.SentimentAnalysis import SentimentAnalysis
 import pickle
 import itertools
 import json
@@ -34,12 +33,12 @@ image_locations = {
     'Success Kid': 'http://i.imgflip.com/1bhk.jpg',
     'The Most Interesting Man In The World': 'http://i.imgflip.com/1bh8.jpg',
     'Socially Awesome Penguin': 'http://i.imgflip.com/1bgz.jpg'
-    
+
 }
 
-filename_all = '../process_data/Trained_Classifier.obj'
-filename_top = '../process_data/Trained_Classifier_Top.obj'
-filename_bottom = '../process_data/Trained_Classifier_Bottom.obj'
+filename_all = 'process_data/Trained_Classifier.obj'
+filename_top = 'process_data/Trained_Classifier_Top.obj'
+filename_bottom = 'process_data/Trained_Classifier_Bottom.obj'
 sa = SentimentAnalysis (filename_all, filename_top, filename_bottom)
 
 app = Flask(__name__)
@@ -52,13 +51,13 @@ def index():
 @app.route("/_classify_sentiment")
 def classify_sentiment ():
     sentence = request.args.get('a', 0, type=str)
-    
+
     prob_dist_combo = sa.maxent_classify_raw (sentence)
     prob_dist = prob_dist_combo[0]
     probabilities = {}
     for type in prob_dist.samples ():
         probabilities[type] = prob_dist_combo[0].prob(type) + prob_dist_combo[1].prob(type) + 3*prob_dist_combo[2].prob(type)
-    
+
     rankings = []
     for key, value in probabilities.iteritems ():
         rankings.append ((key, value))
